@@ -1,41 +1,31 @@
 #!/usr/bin/node
+
 const request = require('request');
 
-const fetchData = (url) => {
-  return new Promise((resolve, reject) => {
-    request(url, (error, response, body) => {
-      if (!error && response.statusCode === 200) {
-        resolve(JSON.parse(body));
-      } else {
-        reject(error);
-      }
-    });
-  });
-};
-
-const baseUrl = 'https://swapi-api.alx-tools.com/api/';
-const endpoint = 'films/';
-
-const url = baseUrl + endpoint + process.argv[2];
-
-const fetchDataFromUrls = async () => {
-  try {
-    const data = await fetchData(url);
-    // console.log(data.characters);
-    const charactersUrl = data.characters;
-    for (const url of charactersUrl) {
-      try {
-        const data = await fetchData(url);
-        const characterName = data.name;
-        console.log(characterName);
-      } catch (error) {
-
-      }
-    }
-  } catch (error) {
-
-    // console.error(error);
+const id = process.argv[2];
+// let test = 0;
+const url = 'https://swapi-api.alx-tools.com/api/films/' + id;
+request(url, (error, response, body) => {
+  if (error) {
+    console.log(error);
+    return;
   }
-};
+  if (response.statusCode === 200) {
+    const itemCharacters = JSON.parse(body).characters;
+    printName(0, itemCharacters[0], itemCharacters);
+  }
+});
 
-fetchDataFromUrls();
+function printName (index, url, characters) {
+  if (characters.length === index) {
+    return;
+  }
+  request(url, (err, res, body) => {
+    if (err) {
+      console.log(err);
+    }
+    console.log(JSON.parse(body).name);
+    index++;
+    printName(index, characters[index], characters);
+  });
+}
